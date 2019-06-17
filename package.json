@@ -1,0 +1,14 @@
+{
+  "name": "git-pending",
+  "version": "1.0.0",
+  "main": "finder.js",
+  "author": "Kamran Ahmed <kaahmed@altayer.com>",
+  "license": "MIT",
+  "dependencies": {
+    "git-blame": "^1.4.0",
+    "git-grep": "^0.1.0",
+    "import-jsx": "^2.0.0",
+    "ink": "^2.2.0",
+    "react": "^16.8.6"
+  }
+}
