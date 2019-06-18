@@ -76,20 +76,58 @@ class Finder extends React.Component {
   }
 
   normalizeComment(content) {
-    return (content || '')
+    // Remove the spaces from both ends of the comment
+    let normalizedComment = (content || '')
       .replace(/^\s+/, '')
-      // Spaces at the beginning
-      .replace(/\s+$/, '')
-      // Comments of type //
-      .replace(/^\/\/\s*/, '')
-      // Comments of type #
-      .replace(/^#\s*/, '')
-      // Comments of type /*
-      .replace(/^\/*\s*/, '')
-      .replace(/\s*\*\}\s*$/, '')
-      // Comments of type {/*
-      .replace(/^\{\s*\/\*\s*/, '')
-      .replace(/\*\/\s*\}\s*$/, '');
+      .replace(/\s+$/, '');
+
+    // List of comment expressions
+    const commentRegexList = [
+      { start: /^.*?\/\/\s*/, end: null, comment: '//' },
+      { start: /^.*?#\s*/, end: null, comment: '#' },
+      { start: /^.*?\/*\s*/, end: /\s*\*\}\s*$/, comment: '/*' },
+      { start: /^.*?\{\s*\/\*\s*/, end: /\*\/\s*\}\s*$/, comment: '{/*' },
+    ];
+
+    let applicableRegex = null;
+    let earliestPosition = -1;
+
+    // Git blame might give the code on line before the comment i.e.
+    // in the cases when the todo comment has been left in front of
+    // the line of code. Here we iterate and find the type of comment
+    // applied to the given line of code
+    commentRegexList.forEach(commentRegex => {
+      // The position where the comment starts
+      const matchPosition = normalizedComment.indexOf(commentRegex.comment);
+      if (matchPosition === -1) {
+        return;
+      }
+
+      // We have got a position before and
+      // this comment lies after the position that we have, ignore
+      if (earliestPosition !== -1 && matchPosition > earliestPosition) {
+        return;
+      }
+
+      // If this matched comment lies before the last comment match, take this
+      earliestPosition = matchPosition;
+      applicableRegex = commentRegex;
+    });
+
+    // No matching comment was found
+    if (!applicableRegex) {
+      return normalizedComment;
+    }
+
+    if (applicableRegex.start) {
+      normalizedComment = normalizedComment.replace(applicableRegex.start, '');
+    }
+
+    if (applicableRegex.end) {
+      normalizedComment = normalizedComment.replace(applicableRegex.end, '');
+    }
+
+    return normalizedComment;
   }
 
   renderComment(hash) {
