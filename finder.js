@@ -157,7 +157,11 @@ class Finder extends React.Component {
   renderComment(hash) {
     const comment = this.state.preparedComments[hash];
     const author = comment.author || {};
-
+    // comment.filename
+    // comment.hash
+    // comment.summary
+    // author.timestamp
+    // author.tz
     return (
       <Box key={hash} green>
         <Box width={20} marginRight={1} textWrap="truncate">
@@ -173,7 +177,7 @@ class Finder extends React.Component {
   renderLoading() {
     return (
       <React.Fragment>
-        <Color yellow>{Object.keys(this.state.rawComments).length} comments found</Color>
+        <Color yellow>Total {Object.keys(this.state.rawComments).length} comments found</Color>
         {<Color green>Loading ...</Color>}
       </React.Fragment>
     );
