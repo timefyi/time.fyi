@@ -1,5 +1,6 @@
 const path = require('path');
 const React = require('react');
+const minimist = require('minimist');
 const gitGrep = require('git-grep');
 const gitBlame = require('git-blame');
 const { render, Color, Static, Box } = require('ink');
@@ -13,6 +14,18 @@ class Finder extends React.Component {
     this.state = {
       projectPath,
       repoPath,
+      // Each of the blame is emitted in two chunks line
+      // and commit. This counter will be held here to identify
+      // if all the blames have been collected — @todo refactor
+      blameCounters: {
+        line: 0,
+        commit: 0,
+      },
+      // Raw comments holds the vanilla "git grep" comments
+      rawComments: {},
+      // Prepared holds the populated blame and commit info alongside
+      preparedComments: {},
+
       comments: {
         raw: {},
         prepared: {}
@@ -26,24 +39,25 @@ class Finder extends React.Component {
     this.normalizeComment = this.normalizeComment.bind(this);
   }
 
-  setStateComment(key, hash, comment) {
-    this.setState(state => ({
-      ...state,
-      comments: {
-        ...state.comments,
-        [key]: {
-          ...state.comments[key],
+  onBlameFound(rawHash, type, blame) {
+    const hash = `${rawHash}${blame.hash}`;
+
+    this.setState(state => {
+      const blameCounters = { ...state.blameCounters };
+      blameCounters[type] = (blameCounters[type] || 0) + 1;
+
+      return {
+        blameCounters,
+        preparedComments: {
+          ...state.preparedComments,
+          // set the newly found counter in the prepared comments
           [hash]: {
-            ...(state.comments[key][hash] || {}),
-            ...comment
+            ...(state.preparedComments[hash] || {}),
+            ...blame
           }
         }
       }
-    }));
-  }
-
-  onBlameFound(rawHash, type, blame) {
-    this.setStateComment('prepared', `${rawHash}${blame.hash}`, blame);
+    });
   }
 
   onCommentFound(comment) {
@@ -51,7 +65,17 @@ class Finder extends React.Component {
     text = text.replace(/\s*$/, '');
 
     const hash = encodeURI(`${file}${line}${text}`);
-    this.setStateComment('raw', hash, comment);
+
+    // Set the newly found raw comment in state
+    this.setState(state => ({
+      rawComments: {
+        ...state.rawComments,
+        [hash]: {
+          ...(state.rawComments[hash] || {}),
+          ...comment
+        }
+      }
+    }));
 
     // Get the commit details and date for when this comment was added
     gitBlame(this.state.repoPath, { file, limitLines: `${comment.line},${comment.line}`, })
@@ -131,7 +155,7 @@ class Finder extends React.Component {
   }
 
   renderComment(hash) {
-    const comment = this.state.comments.prepared[hash];
+    const comment = this.state.preparedComments[hash];
     const author = comment.author || {};
 
     return (
@@ -149,18 +173,19 @@ class Finder extends React.Component {
   renderLoading() {
     return (
       <React.Fragment>
-        <Color yellow>{Object.keys(this.state.comments.raw).length} comments found</Color>
+        <Color yellow>{Object.keys(this.state.rawComments).length} comments found</Color>
         {<Color green>Loading ...</Color>}
       </React.Fragment>
     );
   }
 
   render() {
-    const rawComments = this.state.comments.raw;
-    const preparedComments = this.state.comments.prepared;
+    const rawComments = this.state.rawComments;
+    const preparedComments = this.state.preparedComments;
     const commentsLoaded = Object.keys(rawComments).length === Object.keys(preparedComments).length;
+    const blamesLoaded = this.state.blameCounters.line === this.state.blameCounters.commit;
 
-    if (!commentsLoaded) {
+    if (!commentsLoaded || !blamesLoaded) {
       return this.renderLoading();
     }
 
@@ -169,5 +194,7 @@ class Finder extends React.Component {
     );
   }
 }
+
+// console.log(minimist(process.argv.slice(2)));
 
 render(<Finder/>);

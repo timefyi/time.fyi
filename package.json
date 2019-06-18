@@ -9,6 +9,8 @@
     "git-grep": "^0.1.0",
     "import-jsx": "^2.0.0",
     "ink": "^2.2.0",
+    "log-update": "^3.2.0",
+    "minimist": "^1.2.0",
     "react": "^16.8.6"
   }
 }
