@@ -10,7 +10,7 @@ const { render, Color, Static, Box, Text } = require('ink');
 class Finder extends React.Component {
   constructor(props) {
     super(props);
-    const projectPath = path.resolve(path.join(__dirname, '../../neo/index-products'));
+    const projectPath = path.resolve(path.join(__dirname, '../../neo/ounass'));
     const repoPath = path.join(projectPath, '.git');
 
     // Comment types to be checked
@@ -228,21 +228,27 @@ class Finder extends React.Component {
   }
 
   renderStats() {
+    const totalComments = Object.keys(this.state.preparedComments).length;
+    if (!totalComments) {
+      return null;
+    }
+
     const oldestComment = this.findOldestComment();
-    const oldestAuthor = (oldestComment.author || {})
+    const oldestAuthor = (oldestComment.author || {});
+    const commentCounters = this.state.commentCounters;
 
     return (
       <Box flexDirection='column' padding={1} marginLeft={6}>
         {
-          Object.keys(this.state.commentCounters).map(counterType => {
-            if (!this.state.commentCounters[counterType]) {
+          Object.keys(commentCounters).map(counterType => {
+            if (!commentCounters[counterType]) {
               return;
             }
 
             return (
               <Box key={counterType}>
                 <Box width={20}><Color bold>{counterType.toUpperCase()} Count</Color></Box>
-                <Box><Color yellow>{this.state.commentCounters[counterType]}</Color></Box>
+                <Box><Color yellow>{commentCounters[counterType]}</Color></Box>
               </Box>
             );
           })
@@ -250,7 +256,7 @@ class Finder extends React.Component {
 
         <Box>
           <Box width={20}><Color bold>Total Comments</Color></Box>
-          <Box><Color yellow>{Object.keys(this.state.preparedComments).length}</Color></Box>
+          <Box><Color yellow>{totalComments}</Color></Box>
         </Box>
         <Box>
           <Box width={20}><Color bold>Oldest Comment</Color></Box>
@@ -259,6 +265,10 @@ class Finder extends React.Component {
         <Box>
           <Box width={20}><Color bold>Oldest Commenter</Color></Box>
           <Box><Color yellow>{oldestAuthor.name || ''}</Color></Box>
+        </Box>
+        <Box>
+          <Box width={20}><Color bold>Oldest Comment</Color></Box>
+          <Box><Color yellow>{oldestComment.content || ''}</Color></Box>
         </Box>
       </Box>
     );
@@ -311,6 +321,15 @@ class Finder extends React.Component {
     );
   }
 
+  isFinishedLoading() {
+    const rawComments = this.state.rawComments;
+    const preparedComments = this.state.preparedComments;
+    const commentsLoaded = Object.keys(rawComments).length === Object.keys(preparedComments).length;
+    const blamesLoaded = this.state.blameCounters.line === this.state.blameCounters.commit;
+
+    return commentsLoaded && blamesLoaded;
+  }
+
   renderOneLine() {
     const comments = this.state.preparedComments;
 
@@ -339,12 +358,7 @@ class Finder extends React.Component {
   }
 
   render() {
-    const rawComments = this.state.rawComments;
-    const preparedComments = this.state.preparedComments;
-    const commentsLoaded = Object.keys(rawComments).length === Object.keys(preparedComments).length;
-    const blamesLoaded = this.state.blameCounters.line === this.state.blameCounters.commit;
-
-    if (!commentsLoaded || !blamesLoaded) {
+    if (!this.isFinishedLoading()) {
       return this.renderLoading();
     }
 
