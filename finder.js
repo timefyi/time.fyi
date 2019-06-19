@@ -189,6 +189,29 @@ class Finder extends React.Component {
     );
   }
 
+  renderStats() {
+    return (
+      <Box flexDirection='column' padding={1}>
+        <Box>
+          <Box width={20} marginLeft={3}><Color bold>TODO Count</Color></Box>
+          <Box><Color yellow>23</Color></Box>
+        </Box>
+        <Box>
+          <Box width={20} marginLeft={3}><Color bold>FIXME Count</Color></Box>
+          <Box><Color yellow>23</Color></Box>
+        </Box>
+        <Box>
+          <Box width={20} marginLeft={3}><Color bold>Total Comments</Color></Box>
+          <Box><Color yellow>33</Color></Box>
+        </Box>
+        <Box>
+          <Box width={20} marginLeft={3}><Color bold>Oldest Comment</Color></Box>
+          <Box><Color yellow>5 years ago</Color></Box>
+        </Box>
+      </Box>
+    );
+  }
+
   renderOneLine() {
     const comments = this.state.preparedComments;
 
@@ -207,33 +230,14 @@ class Finder extends React.Component {
 
               return (
                 <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
-                  {/*<Box width={20} textWrap="truncate" marginRight={2}><Color bold yellowBright>{author.name}</Color></Box>*/}
-                  <Box width={14}><Color cyanBright>{diffTime.humanize(true)}</Color></Box>
+                  <Box width={14} textWrap="truncate-end"><Color cyanBright>{diffTime.humanize(true)}</Color></Box>
                   <Box><Color yellow>{comment.content || ''}</Color></Box>
                 </Box>
               )
             })
           }
         </Static>
-
-        <Box flexDirection='column' padding={1}>
-          <Box>
-            <Box width={20} marginLeft={3}><Color bold>TODO Count</Color></Box>
-            <Box><Color yellow>23</Color></Box>
-          </Box>
-          <Box>
-            <Box width={20} marginLeft={3}><Color bold>FIXME Count</Color></Box>
-            <Box><Color yellow>23</Color></Box>
-          </Box>
-          <Box>
-            <Box width={20} marginLeft={3}><Color bold>Total Comments</Color></Box>
-            <Box><Color yellow>33</Color></Box>
-          </Box>
-          <Box>
-            <Box width={20} marginLeft={3}><Color bold>Oldest Comment</Color></Box>
-            <Box><Color yellow>5 years ago</Color></Box>
-          </Box>
-        </Box>
+        {this.renderStats()}
       </React.Fragment>
     );
   }
