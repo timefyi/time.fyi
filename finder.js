@@ -38,11 +38,6 @@ class Finder extends React.Component {
       rawComments: {},
       // Prepared holds the populated blame and commit info alongside
       preparedComments: {},
-
-      comments: {
-        raw: {},
-        prepared: {}
-      },
     };
 
     this.handleError = this.handleError.bind(this);
@@ -50,6 +45,8 @@ class Finder extends React.Component {
     this.onBlameFound = this.onBlameFound.bind(this);
     this.renderComment = this.renderComment.bind(this);
     this.normalizeComment = this.normalizeComment.bind(this);
+    this.findOldestComment = this.findOldestComment.bind(this);
+    this.humanizeTimeStamp = this.humanizeTimeStamp.bind(this);
   }
 
   onBlameFound(rawHash, type, blame) {
@@ -148,7 +145,7 @@ class Finder extends React.Component {
     let earliestPosition = -1;
 
     // Git blame might give the code on line before the comment i.e.
-    // in the cases when the todo comment has been left in front of
+    // in the cases when the comment has been left in front of
     // the line of code. Here we iterate and find the type of comment
     // applied to the given line of code
     commentRegexList.forEach(commentRegex => {
@@ -185,6 +182,22 @@ class Finder extends React.Component {
     return normalizedComment;
   }
 
+  findOldestComment() {
+    let oldestComment = {};
+
+    Object.keys(this.state.preparedComments).forEach(hash => {
+      const currentComment = this.state.preparedComments[hash];
+      const currentStamp = (currentComment.author || {}).timestamp;
+      const oldestStamp = (oldestComment.author || {}).timestamp;
+
+      if (!oldestStamp || currentStamp < oldestStamp) {
+        oldestComment = currentComment;
+      }
+    });
+
+    return oldestComment;
+  }
+
   renderComment(hash) {
     const comment = this.state.preparedComments[hash];
     const author = comment.author || {};
@@ -215,6 +228,9 @@ class Finder extends React.Component {
   }
 
   renderStats() {
+    const oldestComment = this.findOldestComment();
+    const oldestAuthor = (oldestComment.author || {})
+
     return (
       <Box flexDirection='column' padding={1} marginLeft={6}>
         {
@@ -225,8 +241,8 @@ class Finder extends React.Component {
 
             return (
               <Box key={counterType}>
-                <Box width={20}><Color bold>{ counterType.toUpperCase() } Count</Color></Box>
-                <Box><Color yellow>{ this.state.commentCounters[counterType] }</Color></Box>
+                <Box width={20}><Color bold>{counterType.toUpperCase()} Count</Color></Box>
+                <Box><Color yellow>{this.state.commentCounters[counterType]}</Color></Box>
               </Box>
             );
           })
@@ -234,18 +250,25 @@ class Finder extends React.Component {
 
         <Box>
           <Box width={20}><Color bold>Total Comments</Color></Box>
-          <Box><Color yellow>{ Object.keys(this.state.preparedComments).length }</Color></Box>
+          <Box><Color yellow>{Object.keys(this.state.preparedComments).length}</Color></Box>
         </Box>
         <Box>
           <Box width={20}><Color bold>Oldest Comment</Color></Box>
-          <Box><Color yellow>5 years ago</Color></Box>
+          <Box><Color yellow>{this.humanizeTimeStamp(oldestAuthor.timestamp)}</Color></Box>
         </Box>
         <Box>
           <Box width={20}><Color bold>Oldest Commenter</Color></Box>
-          <Box><Color yellow>Kamran Ahmed</Color></Box>
+          <Box><Color yellow>{oldestAuthor.name || ''}</Color></Box>
         </Box>
       </Box>
     );
+  }
+
+  humanizeTimeStamp(timestamp) {
+    const nowTime = moment();
+    const thenTime = moment.unix(timestamp);
+
+    return moment.duration(thenTime.diff(nowTime)).humanize(true);
   }
 
   renderMultiline() {
@@ -258,9 +281,7 @@ class Finder extends React.Component {
             Object.keys(comments).map((hash, counter) => {
               const comment = comments[hash];
               const author = comment.author || {};
-              const nowTime = moment();
-              const thenTime = moment.unix(author.timestamp);
-              const diffTime = moment.duration(thenTime.diff(nowTime)).humanize(true);
+              const diffTime = this.humanizeTimeStamp(author.timestamp);
 
               return (
                 <Box key={hash} flexDirection='row' paddingLeft={2} paddingTop={1}>
@@ -300,10 +321,7 @@ class Finder extends React.Component {
             Object.keys(comments).map((hash, counter) => {
               const comment = comments[hash];
               const author = comment.author || {};
-
-              const nowTime = moment();
-              const thenTime = moment.unix(author.timestamp);
-              const diffTime = moment.duration(thenTime.diff(nowTime)).humanize(true);
+              const diffTime = this.humanizeTimeStamp(author.timestamp);
 
               return (
                 <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
