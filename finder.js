@@ -208,6 +208,10 @@ class Finder extends React.Component {
           <Box width={20} marginLeft={3}><Color bold>Oldest Comment</Color></Box>
           <Box><Color yellow>5 years ago</Color></Box>
         </Box>
+        <Box>
+          <Box width={20} marginLeft={3}><Color bold>Oldest Commenter</Color></Box>
+          <Box><Color yellow>Kamran Ahmed</Color></Box>
+        </Box>
       </Box>
     );
   }
