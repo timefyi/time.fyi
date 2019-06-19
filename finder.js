@@ -4,7 +4,7 @@ const moment = require('moment');
 const gitGrep = require('git-grep');
 const minimist = require('minimist');
 const gitBlame = require('git-blame');
-const { render, Color, Static, Box } = require('ink');
+const { render, Color, Static, Box, Text } = require('ink');
 
 class Finder extends React.Component {
   constructor(props) {
@@ -216,6 +216,45 @@ class Finder extends React.Component {
     );
   }
 
+  renderMultiline() {
+    const comments = this.state.preparedComments;
+
+    return (
+      <React.Fragment>
+        <Static>
+          {
+            Object.keys(comments).map((hash, counter) => {
+              const comment = comments[hash];
+              const author = comment.author || {};
+              const nowTime = moment();
+              const thenTime = moment.unix(author.timestamp);
+              const diffTime = moment.duration(thenTime.diff(nowTime)).humanize(true);
+
+              return (
+                <Box key={hash} flexDirection='column' paddingLeft={2} paddingTop={1}>
+                  <Box flexDirection='column'>
+                    <Box><Color blueBright>{author.name} commented {diffTime}</Color></Box>
+                    <Box>
+                      <Box marginRight={1}>Commit:</Box>
+                      <Box marginRight={1}><Color green>{ comment.hash.substring(0, 7) }</Color></Box>
+                      <Box><Color>{ comment.summary }</Color></Box>
+                    </Box>
+                    <Box>
+                      <Box marginRight={2}>File:</Box>
+                      <Color>{ comment.filename }:{ comment.finalLine }</Color>
+                    </Box>
+                    <Box><Color yellow>{comment.content}</Color></Box>
+                  </Box>
+                </Box>)
+            })
+          }
+
+        </Static>
+        {this.renderStats()}
+      </React.Fragment>
+    );
+  }
+
   renderOneLine() {
     const comments = this.state.preparedComments;
 
@@ -229,12 +268,11 @@ class Finder extends React.Component {
 
               const nowTime = moment();
               const thenTime = moment.unix(author.timestamp);
-              const diffTime = moment.duration(thenTime.diff(nowTime));
-
+              const diffTime = moment.duration(thenTime.diff(nowTime)).humanize(true);
 
               return (
                 <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
-                  <Box width={14} textWrap="truncate-end"><Color cyanBright>{diffTime.humanize(true)}</Color></Box>
+                  <Box width={14} textWrap="truncate-end"><Color cyanBright>{diffTime}</Color></Box>
                   <Box><Color yellow>{comment.content || ''}</Color></Box>
                 </Box>
               )
@@ -256,7 +294,7 @@ class Finder extends React.Component {
       return this.renderLoading();
     }
 
-    return this.renderOneLine();
+    return this.renderMultiline();
   }
 }
 
