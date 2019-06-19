@@ -5,6 +5,7 @@
   "author": "Kamran Ahmed <kaahmed@altayer.com>",
   "license": "MIT",
   "dependencies": {
+    "figures": "^3.0.0",
     "git-blame": "^1.4.0",
     "git-grep": "^0.1.0",
     "import-jsx": "^2.0.0",

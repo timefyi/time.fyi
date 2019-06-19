@@ -1,6 +1,7 @@
 const path = require('path');
 const React = require('react');
 const moment = require('moment');
+const figures = require('figures');
 const gitGrep = require('git-grep');
 const minimist = require('minimist');
 const gitBlame = require('git-blame');
@@ -191,25 +192,25 @@ class Finder extends React.Component {
 
   renderStats() {
     return (
-      <Box flexDirection='column' padding={1}>
+      <Box flexDirection='column' padding={1} marginLeft={5}>
         <Box>
-          <Box width={20} marginLeft={3}><Color bold>TODO Count</Color></Box>
+          <Box width={20}><Color bold>TODO Count</Color></Box>
           <Box><Color yellow>23</Color></Box>
         </Box>
         <Box>
-          <Box width={20} marginLeft={3}><Color bold>FIXME Count</Color></Box>
+          <Box width={20}><Color bold>FIXME Count</Color></Box>
           <Box><Color yellow>23</Color></Box>
         </Box>
         <Box>
-          <Box width={20} marginLeft={3}><Color bold>Total Comments</Color></Box>
+          <Box width={20}><Color bold>Total Comments</Color></Box>
           <Box><Color yellow>33</Color></Box>
         </Box>
         <Box>
-          <Box width={20} marginLeft={3}><Color bold>Oldest Comment</Color></Box>
+          <Box width={20}><Color bold>Oldest Comment</Color></Box>
           <Box><Color yellow>5 years ago</Color></Box>
         </Box>
         <Box>
-          <Box width={20} marginLeft={3}><Color bold>Oldest Commenter</Color></Box>
+          <Box width={20}><Color bold>Oldest Commenter</Color></Box>
           <Box><Color yellow>Kamran Ahmed</Color></Box>
         </Box>
       </Box>
@@ -236,12 +237,12 @@ class Finder extends React.Component {
                     <Box><Color blueBright>{author.name} commented {diffTime}</Color></Box>
                     <Box>
                       <Box marginRight={1}>Commit:</Box>
-                      <Box marginRight={1}><Color green>{ comment.hash.substring(0, 7) }</Color></Box>
-                      <Box><Color>{ comment.summary }</Color></Box>
+                      <Box marginRight={1}><Color green>{comment.hash.substring(0, 7)}</Color></Box>
+                      <Box><Color>{comment.summary}</Color></Box>
                     </Box>
                     <Box>
                       <Box marginRight={2}>File:</Box>
-                      <Color>{ comment.filename }:{ comment.finalLine }</Color>
+                      <Color>{comment.filename}:{comment.finalLine}</Color>
                     </Box>
                     <Box><Color yellow>{comment.content}</Color></Box>
                   </Box>
@@ -272,6 +273,7 @@ class Finder extends React.Component {
 
               return (
                 <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
+                  <Box width={3}><Color blue bold>{figures('❯︎')}</Color></Box>
                   <Box width={14} textWrap="truncate-end"><Color cyanBright>{diffTime}</Color></Box>
                   <Box><Color yellow>{comment.content || ''}</Color></Box>
                 </Box>
