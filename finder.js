@@ -192,7 +192,7 @@ class Finder extends React.Component {
 
   renderStats() {
     return (
-      <Box flexDirection='column' padding={1} marginLeft={5}>
+      <Box flexDirection='column' padding={1} marginLeft={6}>
         <Box>
           <Box width={20}><Color bold>TODO Count</Color></Box>
           <Box><Color yellow>23</Color></Box>
@@ -232,19 +232,22 @@ class Finder extends React.Component {
               const diffTime = moment.duration(thenTime.diff(nowTime)).humanize(true);
 
               return (
-                <Box key={hash} flexDirection='column' paddingLeft={2} paddingTop={1}>
+                <Box key={hash} flexDirection='row' paddingLeft={2} paddingTop={1}>
+                  <Box width={3}>
+                    <Color blue bold>{figures('❯︎')}</Color>
+                  </Box>
                   <Box flexDirection='column'>
-                    <Box><Color blueBright>{author.name} commented {diffTime}</Color></Box>
+                    <Box marginLeft={1}><Color yellow>{comment.content}</Color></Box>
                     <Box>
-                      <Box marginRight={1}>Commit:</Box>
-                      <Box marginRight={1}><Color green>{comment.hash.substring(0, 7)}</Color></Box>
+                      <Box marginRight={1}><Color>Commit:</Color></Box>
+                      <Box marginRight={1}><Color>({comment.hash.substring(0, 7)})</Color></Box>
                       <Box><Color>{comment.summary}</Color></Box>
                     </Box>
                     <Box>
-                      <Box marginRight={2}>File:</Box>
+                      <Box marginRight={2}><Color>File:</Color></Box>
                       <Color>{comment.filename}:{comment.finalLine}</Color>
                     </Box>
-                    <Box><Color yellow>{comment.content}</Color></Box>
+                    <Box><Color gray>{author.name} commented {diffTime}</Color></Box>
                   </Box>
                 </Box>)
             })
