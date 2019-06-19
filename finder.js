@@ -1,14 +1,15 @@
 const path = require('path');
 const React = require('react');
-const minimist = require('minimist');
+const moment = require('moment');
 const gitGrep = require('git-grep');
+const minimist = require('minimist');
 const gitBlame = require('git-blame');
 const { render, Color, Static, Box } = require('ink');
 
 class Finder extends React.Component {
   constructor(props) {
     super(props);
-    const projectPath = path.resolve(path.join(__dirname, '../../neo/ounass'));
+    const projectPath = path.resolve(path.join(__dirname, '../../neo/index-products'));
     const repoPath = path.join(projectPath, '.git');
 
     this.state = {
@@ -45,6 +46,11 @@ class Finder extends React.Component {
     this.setState(state => {
       const blameCounters = { ...state.blameCounters };
       blameCounters[type] = (blameCounters[type] || 0) + 1;
+
+      // Normalize the blame comment if available
+      if (blame.content) {
+        blame.content = this.normalizeComment(blame.content);
+      }
 
       return {
         blameCounters,
@@ -178,7 +184,56 @@ class Finder extends React.Component {
     return (
       <React.Fragment>
         <Color yellow>Total {Object.keys(this.state.rawComments).length} comments found</Color>
-        {<Color green>Loading ...</Color>}
+        <Color green>Loading ...</Color>
+      </React.Fragment>
+    );
+  }
+
+  renderOneLine() {
+    const comments = this.state.preparedComments;
+
+    return (
+      <React.Fragment>
+        <Static>
+          {
+            Object.keys(comments).map((hash, counter) => {
+              const comment = comments[hash];
+              const author = comment.author || {};
+
+              const nowTime = moment();
+              const thenTime = moment.unix(author.timestamp);
+              const diffTime = moment.duration(thenTime.diff(nowTime));
+
+
+              return (
+                <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
+                  {/*<Box width={20} textWrap="truncate" marginRight={2}><Color bold yellowBright>{author.name}</Color></Box>*/}
+                  <Box width={14}><Color cyanBright>{diffTime.humanize(true)}</Color></Box>
+                  <Box><Color yellow>{comment.content || ''}</Color></Box>
+                </Box>
+              )
+            })
+          }
+        </Static>
+
+        <Box flexDirection='column' padding={1}>
+          <Box>
+            <Box width={20} marginLeft={3}><Color bold>TODO Count</Color></Box>
+            <Box><Color yellow>23</Color></Box>
+          </Box>
+          <Box>
+            <Box width={20} marginLeft={3}><Color bold>FIXME Count</Color></Box>
+            <Box><Color yellow>23</Color></Box>
+          </Box>
+          <Box>
+            <Box width={20} marginLeft={3}><Color bold>Total Comments</Color></Box>
+            <Box><Color yellow>33</Color></Box>
+          </Box>
+          <Box>
+            <Box width={20} marginLeft={3}><Color bold>Oldest Comment</Color></Box>
+            <Box><Color yellow>5 years ago</Color></Box>
+          </Box>
+        </Box>
       </React.Fragment>
     );
   }
@@ -193,9 +248,7 @@ class Finder extends React.Component {
       return this.renderLoading();
     }
 
-    return (
-      <Static>{Object.keys(preparedComments).map(this.renderComment)}</Static>
-    );
+    return this.renderOneLine();
   }
 }
 
