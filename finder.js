@@ -13,9 +13,20 @@ class Finder extends React.Component {
     const projectPath = path.resolve(path.join(__dirname, '../../neo/index-products'));
     const repoPath = path.join(projectPath, '.git');
 
+    // Comment types to be checked
+    this.commentTypes = ['TESTME', 'DOCME', 'FIXME', 'TODO'];
+
     this.state = {
       projectPath,
       repoPath,
+      // Counters that will be populated while the comments are being
+      // read. Used to show the stats
+      commentCounters: {
+        todo: 0,
+        fixme: 0,
+        testme: 0,
+        docme: 0,
+      },
       // Each of the blame is emitted in two chunks line
       // and commit. This counter will be held here to identify
       // if all the blames have been collected — @todo refactor
@@ -45,15 +56,28 @@ class Finder extends React.Component {
     const hash = `${rawHash}${blame.hash}`;
 
     this.setState(state => {
+      const commentCounters = { ...state.commentCounters };
       const blameCounters = { ...state.blameCounters };
       blameCounters[type] = (blameCounters[type] || 0) + 1;
 
       // Normalize the blame comment if available
+      // and populate the relevant stats in the state
       if (blame.content) {
         blame.content = this.normalizeComment(blame.content);
+
+        // Identify and increase the counter for the comment type
+        this.commentTypes.forEach(commentType => {
+          const currentType = commentType.toLowerCase();
+          const content = blame.content.toLowerCase();
+
+          if (content.indexOf(currentType) !== -1) {
+            commentCounters[currentType] = (commentCounters[currentType] || 0) + 1;
+          }
+        });
       }
 
       return {
+        commentCounters,
         blameCounters,
         preparedComments: {
           ...state.preparedComments,
@@ -96,7 +120,7 @@ class Finder extends React.Component {
   }
 
   loadComments() {
-    gitGrep(this.state.repoPath, { rev: 'HEAD', term: '((TODO)|(FIXME)|(TESTME)|(DOCME))' })
+    gitGrep(this.state.repoPath, { rev: 'HEAD', term: `(${this.commentTypes.join(')|(')})` })
       .on('data', this.onCommentFound)
       .on('error', this.handleError)
       .on('end', () => null);
@@ -193,17 +217,24 @@ class Finder extends React.Component {
   renderStats() {
     return (
       <Box flexDirection='column' padding={1} marginLeft={6}>
-        <Box>
-          <Box width={20}><Color bold>TODO Count</Color></Box>
-          <Box><Color yellow>23</Color></Box>
-        </Box>
-        <Box>
-          <Box width={20}><Color bold>FIXME Count</Color></Box>
-          <Box><Color yellow>23</Color></Box>
-        </Box>
+        {
+          Object.keys(this.state.commentCounters).map(counterType => {
+            if (!this.state.commentCounters[counterType]) {
+              return;
+            }
+
+            return (
+              <Box key={counterType}>
+                <Box width={20}><Color bold>{ counterType.toUpperCase() } Count</Color></Box>
+                <Box><Color yellow>{ this.state.commentCounters[counterType] }</Color></Box>
+              </Box>
+            );
+          })
+        }
+
         <Box>
           <Box width={20}><Color bold>Total Comments</Color></Box>
-          <Box><Color yellow>33</Color></Box>
+          <Box><Color yellow>{ Object.keys(this.state.preparedComments).length }</Color></Box>
         </Box>
         <Box>
           <Box width={20}><Color bold>Oldest Comment</Color></Box>
@@ -299,7 +330,7 @@ class Finder extends React.Component {
       return this.renderLoading();
     }
 
-    return this.renderMultiline();
+    return this.renderOneLine();
   }
 }
 
