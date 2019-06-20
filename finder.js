@@ -6,6 +6,7 @@ const moment = require('moment');
 const figures = require('figures');
 const gitGrep = require('git-grep');
 const gitBlame = require('git-blame');
+const PropTypes = require('prop-types');
 const { Color, Static, Box } = require('ink');
 
 class Finder extends React.Component {
@@ -363,8 +364,18 @@ class Finder extends React.Component {
       return this.renderLoading();
     }
 
-    return this.renderOneLine();
+    if (this.props.oneline) {
+      return this.renderOneLine();
+    }
+
+    return this.renderMultiline();
   }
 }
+
+Finder.propTypes = {
+  oneline: PropTypes.bool,
+  comments: PropTypes.string,
+  author: PropTypes.string,
+};
 
 module.exports = Finder;

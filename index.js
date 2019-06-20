@@ -22,17 +22,15 @@ const cli = meow(`
       # gets only the given type of comments e.g. "FIXME"
 
     Options
-      --oneline    Shows each comment in single line
-      --comments   Type of comments required FIXME/TODO/DOCME/TESTME
-      --no-stats   Do not show the stats at the end
-      --author     Name of the author to show the comments from
+      --oneline -o    Shows each comment in single line
+      --comments -c   Type of comments required FIXME/TODO/DOCME/TESTME
+      --author -a     Name of the author to show the comments from
 `, {
-  boolean: [
-    'oneline',
-    'comments',
-    'no-stats',
-    'author'
-  ],
+  flags: {
+    'oneline': { type: 'boolean', alias: 'o' },
+    'comments': { type: 'string', alias: 'c' },
+    'author': { type: 'string', alias: 'a' }
+  },
 });
 
 render(React.createElement(ui, cli.flags));
