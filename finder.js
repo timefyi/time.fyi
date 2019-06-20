@@ -1,11 +1,12 @@
+'use strict';
+
 const path = require('path');
 const React = require('react');
 const moment = require('moment');
 const figures = require('figures');
 const gitGrep = require('git-grep');
-const minimist = require('minimist');
 const gitBlame = require('git-blame');
-const { render, Color, Static, Box, Text } = require('ink');
+const { Color, Static, Box } = require('ink');
 
 class Finder extends React.Component {
   constructor(props) {
@@ -366,6 +367,4 @@ class Finder extends React.Component {
   }
 }
 
-// console.log(minimist(process.argv.slice(2)));
-
-render(<Finder/>);
+module.exports = Finder;
