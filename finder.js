@@ -94,6 +94,17 @@ class Finder extends React.Component {
     let { file, line, text } = comment;
     text = text.replace(/\s*$/, '');
 
+    // If comment type filter is applied, then check for the existence of the
+    // given comment type and process this only if the comment type matches
+    if (this.props.comments) {
+      const requiredType = this.props.comments.toUpperCase();
+      const ucText = text.toUpperCase();
+
+      if (ucText.indexOf(requiredType) === -1) {
+        return;
+      }
+    }
+
     const hash = encodeURI(`${file}${line}${text}`);
 
     // Set the newly found raw comment in state
