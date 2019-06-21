@@ -17,10 +17,15 @@ const cli = meow(`
       $ git pending [options]
 
       $ git pending --oneline 
+      $ git pending -o
       # shows the comments in non-verbose manner
 
-      $ git pending --comments "FIXME" 
+      $ git pending --type "FIXME"
+      $ git pending -t "FIXME"
       # gets only the given type of comments e.g. "FIXME"
+
+      $ git pending --type "FIXME" --author kamran --oneline
+      # gets all the fixme comments by kamran
 
     Options
       --oneline -o    Shows each comment in single line
@@ -35,6 +40,6 @@ const cli = meow(`
 });
 
 cli.flags = cli.flags || {};
-cli.flags.path = path.join(__dirname, '../../neo/ounass');
+cli.flags.path = __dirname;
 
 render(React.createElement(ui, cli.flags));
