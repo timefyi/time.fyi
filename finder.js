@@ -48,26 +48,23 @@ class Finder extends React.Component {
     this.normalizeComment = this.normalizeComment.bind(this);
     this.findOldestComment = this.findOldestComment.bind(this);
     this.humanizeTimeStamp = this.humanizeTimeStamp.bind(this);
-    this.hasFilters = this.hasFilters.bind(this);
     this.getFilteredComments = this.getFilteredComments.bind(this);
     this.countTypes = this.countTypes.bind(this);
   }
 
-  hasFilters() {
-    const hasAuthor = !!this.props.author;
-    const hasType = !!this.props.type;
-
-    return hasAuthor || hasType;
-  }
-
-  getFilteredComments() {
-    if (!this.hasFilters()) {
-      return { ...this.state.preparedComments };
+  /**
+   * Filters the given comments using the provided filters
+   * @param {Object} comments
+   * @param {Object} filters
+   * @returns {Object}
+   */
+  getFilteredComments(comments, filters) {
+    if (!filters.type && !filters.author) {
+      return { ...comments };
     }
 
-    const requiredType = (this.props.type || '').toUpperCase();
-    const requiredAuthor = (this.props.author || '').toUpperCase();
-    const comments = this.state.preparedComments || {};
+    const requiredType = (filters.type || '').toLowerCase();
+    const requiredAuthor = (filters.author || '').toLowerCase();
     const filteredComments = [];
 
     // Filter the comments matching the given criteria
@@ -78,8 +75,8 @@ class Finder extends React.Component {
 
       const comment = comments[hash];
       const author = (comment.author || {});
-      const authorName = (author.name || '').toUpperCase();
-      const commentText = (comment.content || '').toUpperCase();
+      const authorName = (author.name || '').toLowerCase();
+      const commentText = (comment.content || '').toLowerCase();
 
       // If type filter is given and the type of comment does not match
       if (requiredType && commentText.indexOf(requiredType) === -1) {
@@ -94,7 +91,12 @@ class Finder extends React.Component {
     return filteredComments;
   }
 
-
+  /**
+   * Called while the blames are being read
+   * @param {string} rawHash Random hash to identify the comment
+   * @param {string} type Set to `commit` or `file`
+   * @param {Object} blame Actual blame object
+   */
   onBlameFound(rawHash, type, blame) {
     const hash = `${rawHash}${blame.hash}`;
 
@@ -122,6 +124,10 @@ class Finder extends React.Component {
     });
   }
 
+  /**
+   * Called for each of the git-grep results with the grep result
+   * @param {Object} comment
+   */
   onCommentFound(comment) {
     let { file, line, text } = comment;
     text = text.replace(/\s*$/, '');
@@ -146,7 +152,12 @@ class Finder extends React.Component {
       .on('end', () => null);
   }
 
+  /**
+   * Called whenever an error occurs
+   * @param err
+   */
   handleError(err) {
+    // @todo render it in the UI
     console.log(err);
   }
 
@@ -396,7 +407,11 @@ class Finder extends React.Component {
     }
 
     // @TODO Filter while comments are being read
-    const comments = this.getFilteredComments(this.state.preparedComments);
+    const comments = this.getFilteredComments(this.state.preparedComments, {
+      type: this.props.type || '',
+      author: this.props.author || ''
+    });
+
     if (this.props.oneline) {
       return this.renderOneLine(comments);
     }
