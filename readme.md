@@ -49,8 +49,8 @@ git pending -t fixme -a kamran  # FIXME comments from specific author
 git pending -t fixme -o         # Non-verbose fixme comments
 
 # By default, it looks for text todo, fixme, testme and docme anywhere 
-#  in the comment. If you want to make the checks strict i.e. only match 
-#  @todo, @fixme, @testme and @docme, then use --strict flag
+# in the comment. If you want to make the checks strict i.e. only match 
+# @todo, @fixme, @testme and @docme, then use --strict flag
 git pending --strict
 
 ```
