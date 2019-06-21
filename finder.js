@@ -315,10 +315,6 @@ class Finder extends React.Component {
         }
 
         <Box>
-          <Box width={20}><Color bold>Total Comments</Color></Box>
-          <Box><Color yellow>{totalComments}</Color></Box>
-        </Box>
-        <Box>
           <Box width={20}><Color bold>Oldest Comment</Color></Box>
           <Box><Color yellow>{this.humanizeTimeStamp(oldestAuthor.timestamp)}</Color></Box>
         </Box>
