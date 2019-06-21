@@ -33,12 +33,14 @@ const cli = meow(`
       --type -t       Type of comments required FIXME/TODO/DOCME/TESTME
       --author -a     Name of the author to show the comments from
       --no-stats      Do not show the stats
+      --strict        Keywords must be prefixed with "@" i.e. "@todo, @fixme, @docme, @testme"
 `, {
   flags: {
     'oneline': { type: 'boolean', alias: 'o' },
-    'stats': { type: 'boolean', alias: 's', default: true },
+    'stats': { type: 'boolean', default: true },
     'type': { type: 'string', alias: 't' },
     'author': { type: 'string', alias: 'a' },
+    'strict': { type: 'boolean', alias: 's', default: false },
   },
 });
 

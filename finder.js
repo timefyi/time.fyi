@@ -16,10 +16,11 @@ class Finder extends React.Component {
     const repoPath = path.join(projectPath, '.git');
 
     // Comment types to be checked
+    // Prefix with @ for strict checks
     this.commentTypes = [
       'TESTME', 'DOCME', 'FIXME', 'TODO',
       'testme', 'docme', 'fixme', 'todo',
-    ];
+    ].map(commentType => this.props.strict ? `@${commentType}` : commentType);
 
     this.state = {
       operations: [],
@@ -433,6 +434,7 @@ class Finder extends React.Component {
 
 Finder.propTypes = {
   stats: PropTypes.bool,
+  strict: PropTypes.bool,
   oneline: PropTypes.bool,
   type: PropTypes.string,
   author: PropTypes.string,
