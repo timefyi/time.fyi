@@ -16,7 +16,10 @@ class Finder extends React.Component {
     const repoPath = path.join(projectPath, '.git');
 
     // Comment types to be checked
-    this.commentTypes = ['TESTME', 'DOCME', 'FIXME', 'TODO'];
+    this.commentTypes = [
+      'TESTME', 'DOCME', 'FIXME', 'TODO',
+      'testme', 'docme', 'fixme', 'todo',
+    ];
 
     this.state = {
       operations: [],
@@ -158,8 +161,8 @@ class Finder extends React.Component {
    * @param err
    */
   handleError(err) {
-    // @todo render it in the UI
-    console.log(err);
+    // This is getting called when there are no relevant comments
+    // @fixme parse and render
   }
 
   loadComments() {
@@ -370,7 +373,7 @@ class Finder extends React.Component {
           }
 
         </Static>
-        {this.renderStats(comments)}
+        {this.props.stats && this.renderStats(comments)}
       </React.Fragment>
     );
   }
@@ -397,14 +400,14 @@ class Finder extends React.Component {
               return (
                 <Box key={hash} paddingLeft={2} paddingTop={counter === 0 ? 1 : 0}>
                   <Box width={3}><Color blue bold>{figures('❯︎')}</Color></Box>
-                  <Box width={14} textWrap="truncate-end"><Color cyanBright>{diffTime}</Color></Box>
+                  <Box width={17} textWrap="truncate-end"><Color cyanBright>{diffTime}</Color></Box>
                   <Box><Color yellow>{comment.content || ''}</Color></Box>
                 </Box>
               )
             })
           }
         </Static>
-        {this.renderStats(comments)}
+        {this.props.stats && this.renderStats(comments)}
       </React.Fragment>
     );
   }
@@ -429,6 +432,7 @@ class Finder extends React.Component {
 }
 
 Finder.propTypes = {
+  stats: PropTypes.bool,
   oneline: PropTypes.bool,
   type: PropTypes.string,
   author: PropTypes.string,
