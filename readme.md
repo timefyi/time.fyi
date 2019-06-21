@@ -36,6 +36,16 @@ git pending [--oneline|-o ]
 
 Here is the list of sample usage examples
 
+```bash
+git pending                     # All TODO, FIXME, DOCME or TESTME comments with commit details
+git pending --no-stats          # Comments without stats
+git pending --oneline           # Comments with only date
+git pending --type fixme        # Only the fixme comments
+git pending --author kamran     # Comments from specific author
+git pending -t fixme -a kamran  # FIXME comments from specific author
+git pending -t fixme -o         # Non-verbose fixme comments
+```
+
 ### Comments by Single Author
 
 > If you don't pass `--author` flag, it will show you the comments from everyone
@@ -65,31 +75,6 @@ git pending --type FIXME
 git pending --type DOCME
 ```
 ![](./.github/git-pending-type.gif)
-
-### More Examples
-
-```bash
-# List all the TODO, FIXME, DOCME or TESTME comments
-git pending
-
-# List comments without stats
-git pending --no-stats
-
-# Lists the comments with only date
-git pending --oneline
-
-# Lists only the fixme comments
-git pending --type fixme
-
-# Lists the comments from specific author
-git pending --author kamran
-
-# Lists the specific type of comments from specific author
-git pending --type fixme --author kamran 
-
-# Provide options in short form
-git pending -t fixme -a kamran -o
-```
 
 ## License
 MIT &copy; [Kamran Ahmed](https://twitter.com/kamranahmedse)
