@@ -256,7 +256,7 @@ class Finder extends React.Component {
     return oldestComment;
   }
 
-  renderLoading() {
+  renderOperations() {
     return (
       <React.Fragment>
         {this.state.operations.map(operation => <Color key={operation} green>{operation}</Color>)}
@@ -411,7 +411,7 @@ class Finder extends React.Component {
 
   render() {
     if (!this.isFinishedLoading()) {
-      return this.renderLoading();
+      return this.renderOperations();
     }
 
     // @TODO Filter while comments are being read
