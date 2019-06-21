@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 const meow = require('meow');
-const path = require('path');
 const React = require('react');
 const { render } = require('ink');
 const importJsx = require('import-jsx');

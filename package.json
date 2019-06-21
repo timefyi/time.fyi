@@ -1,8 +1,19 @@
 {
   "name": "git-pending",
   "version": "1.0.0",
-  "main": "finder.js",
-  "author": "Kamran Ahmed <kaahmed@altayer.com>",
+  "main": "index.js",
+  "author": "Kamran Ahmed <kamranahmed.se@gmail.com>",
+  "keywords": [
+    "cli-app",
+    "cli",
+    "git-pending",
+    "todo",
+    "fixme",
+    "testme"
+  ],
+  "bin": {
+    "git-pending": "index.js"
+  },
   "license": "MIT",
   "dependencies": {
     "figures": "^3.0.0",
@@ -10,8 +21,6 @@
     "git-grep": "^0.1.0",
     "import-jsx": "^2.0.0",
     "ink": "^2.2.0",
-    "ink-spinner": "^3.0.1",
-    "log-update": "^3.2.0",
     "meow": "^5.0.0",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
