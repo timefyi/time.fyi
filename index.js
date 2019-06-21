@@ -39,6 +39,6 @@ const cli = meow(`
 });
 
 cli.flags = cli.flags || {};
-cli.flags.path = __dirname;
+cli.flags.path = process.cwd();
 
 render(React.createElement(ui, cli.flags));
