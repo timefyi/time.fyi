@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const meow = require('meow');
+const path = require('path');
 const React = require('react');
 const { render } = require('ink');
 const importJsx = require('import-jsx');
@@ -32,5 +33,8 @@ const cli = meow(`
     'author': { type: 'string', alias: 'a' }
   },
 });
+
+cli.flags = cli.flags || {};
+cli.flags.path = path.join(__dirname, '../../neo/ounass');
 
 render(React.createElement(ui, cli.flags));

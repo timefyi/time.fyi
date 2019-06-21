@@ -12,7 +12,7 @@ const { Color, Static, Box } = require('ink');
 class Finder extends React.Component {
   constructor(props) {
     super(props);
-    const projectPath = path.resolve(path.join(__dirname, '../../neo/ounass'));
+    const projectPath = path.resolve(this.props.path);
     const repoPath = path.join(projectPath, '.git');
 
     // Comment types to be checked
@@ -409,6 +409,7 @@ Finder.propTypes = {
   oneline: PropTypes.bool,
   type: PropTypes.string,
   author: PropTypes.string,
+  path: PropTypes.string.isRequired,
 };
 
 module.exports = Finder;
