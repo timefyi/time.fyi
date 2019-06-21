@@ -19,6 +19,7 @@ class Finder extends React.Component {
     this.commentTypes = ['TESTME', 'DOCME', 'FIXME', 'TODO'];
 
     this.state = {
+      operations: [],
       projectPath,
       repoPath,
       // Counters that will be populated while the comments are being
@@ -162,10 +163,22 @@ class Finder extends React.Component {
   }
 
   loadComments() {
+    this.setState(state => ({
+      operations: [...state.operations, 'Finding comments ..']
+    }));
+
     gitGrep(this.state.repoPath, { rev: 'HEAD', term: `(${this.commentTypes.join(')|(')})` })
       .on('data', this.onCommentFound)
       .on('error', this.handleError)
-      .on('end', () => null);
+      .on('end', () => {
+        this.setState(state => ({
+          operations: [
+            ...state.operations,
+            'Lookup completed ..',
+            'Reading authors ..'
+          ]
+        }))
+      });
   }
 
   componentDidMount() {
@@ -246,8 +259,7 @@ class Finder extends React.Component {
   renderLoading() {
     return (
       <React.Fragment>
-        <Color yellow>Total {Object.keys(this.state.rawComments).length} comments found</Color>
-        <Color green>Loading ...</Color>
+        {this.state.operations.map(operation => <Color key={operation} green>{operation}</Color>)}
       </React.Fragment>
     );
   }
