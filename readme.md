@@ -1,2 +1,2 @@
 ## git-pending
-> Gets the TODO, 
+> Lists the TODO, FIXME, DOCME and TESTME comments
