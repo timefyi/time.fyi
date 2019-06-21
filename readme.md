@@ -28,6 +28,9 @@ git pending [--oneline|-o ]
             [--type|-t <fixme|testme|docme|todo>]
             [--author|-a <author>]
             [--no-stats]
+            [--strict]
+            [--help]
+            [--version]
 ```
 
 ![](./.github/2.png)
@@ -80,6 +83,11 @@ git pending --oneline
 
 # Lists only the fixme comments
 git pending --type fixme
+
+# By default, it looks for text todo, fixme, testme and docme anywhere 
+#  in the comment. If you want to make the checks strict i.e. only match 
+#  @todo, @fixme, @testme and @docme, then use --strict flag
+git pending --strict
 
 # Lists the comments from specific author
 git pending --author kamran
