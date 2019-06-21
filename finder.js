@@ -45,17 +45,60 @@ class Finder extends React.Component {
     this.handleError = this.handleError.bind(this);
     this.onCommentFound = this.onCommentFound.bind(this);
     this.onBlameFound = this.onBlameFound.bind(this);
-    this.renderComment = this.renderComment.bind(this);
     this.normalizeComment = this.normalizeComment.bind(this);
     this.findOldestComment = this.findOldestComment.bind(this);
     this.humanizeTimeStamp = this.humanizeTimeStamp.bind(this);
+    this.hasFilters = this.hasFilters.bind(this);
+    this.getFilteredComments = this.getFilteredComments.bind(this);
+    this.countTypes = this.countTypes.bind(this);
   }
+
+  hasFilters() {
+    const hasAuthor = !!this.props.author;
+    const hasType = !!this.props.type;
+
+    return hasAuthor || hasType;
+  }
+
+  getFilteredComments() {
+    if (!this.hasFilters()) {
+      return { ...this.state.preparedComments };
+    }
+
+    const requiredType = (this.props.type || '').toUpperCase();
+    const requiredAuthor = (this.props.author || '').toUpperCase();
+    const comments = this.state.preparedComments || {};
+    const filteredComments = [];
+
+    // Filter the comments matching the given criteria
+    for (let hash in comments) {
+      if (!comments.hasOwnProperty(hash)) {
+        continue;
+      }
+
+      const comment = comments[hash];
+      const author = (comment.author || {});
+      const authorName = (author.name || '').toUpperCase();
+      const commentText = (comment.content || '').toUpperCase();
+
+      // If type filter is given and the type of comment does not match
+      if (requiredType && commentText.indexOf(requiredType) === -1) {
+        continue;
+      } else if (requiredAuthor && authorName.indexOf(requiredAuthor) === -1) {
+        continue;
+      }
+
+      filteredComments.push({ ...comment });
+    }
+
+    return filteredComments;
+  }
+
 
   onBlameFound(rawHash, type, blame) {
     const hash = `${rawHash}${blame.hash}`;
 
     this.setState(state => {
-      const commentCounters = { ...state.commentCounters };
       const blameCounters = { ...state.blameCounters };
       blameCounters[type] = (blameCounters[type] || 0) + 1;
 
@@ -63,20 +106,9 @@ class Finder extends React.Component {
       // and populate the relevant stats in the state
       if (blame.content) {
         blame.content = this.normalizeComment(blame.content);
-
-        // Identify and increase the counter for the comment type
-        this.commentTypes.forEach(commentType => {
-          const currentType = commentType.toLowerCase();
-          const content = blame.content.toLowerCase();
-
-          if (content.indexOf(currentType) !== -1) {
-            commentCounters[currentType] = (commentCounters[currentType] || 0) + 1;
-          }
-        });
       }
 
       return {
-        commentCounters,
         blameCounters,
         preparedComments: {
           ...state.preparedComments,
@@ -93,17 +125,6 @@ class Finder extends React.Component {
   onCommentFound(comment) {
     let { file, line, text } = comment;
     text = text.replace(/\s*$/, '');
-
-    // If comment type filter is applied, then check for the existence of the
-    // given comment type and process this only if the comment type matches
-    if (this.props.comments) {
-      const requiredType = this.props.comments.toUpperCase();
-      const ucText = text.toUpperCase();
-
-      if (ucText.indexOf(requiredType) === -1) {
-        return;
-      }
-    }
 
     const hash = encodeURI(`${file}${line}${text}`);
 
@@ -195,11 +216,11 @@ class Finder extends React.Component {
     return normalizedComment;
   }
 
-  findOldestComment() {
+  findOldestComment(comments) {
     let oldestComment = {};
 
-    Object.keys(this.state.preparedComments).forEach(hash => {
-      const currentComment = this.state.preparedComments[hash];
+    Object.keys(comments).forEach(hash => {
+      const currentComment = comments[hash];
       const currentStamp = (currentComment.author || {}).timestamp;
       const oldestStamp = (oldestComment.author || {}).timestamp;
 
@@ -211,26 +232,6 @@ class Finder extends React.Component {
     return oldestComment;
   }
 
-  renderComment(hash) {
-    const comment = this.state.preparedComments[hash];
-    const author = comment.author || {};
-    // comment.filename
-    // comment.hash
-    // comment.summary
-    // author.timestamp
-    // author.tz
-    return (
-      <Box key={hash} green>
-        <Box width={20} marginRight={1} textWrap="truncate">
-          <Color yellow>{author.name || ''}</Color>
-        </Box>
-        <Box flexGrow={1}>
-          {this.normalizeComment(comment.content)}
-        </Box>
-      </Box>
-    )
-  }
-
   renderLoading() {
     return (
       <React.Fragment>
@@ -240,15 +241,38 @@ class Finder extends React.Component {
     );
   }
 
-  renderStats() {
-    const totalComments = Object.keys(this.state.preparedComments).length;
+  countTypes(comments) {
+    const counters = {};
+    const availableTypes = this.commentTypes;
+
+    for (let hash in comments) {
+      if (!comments.hasOwnProperty(hash)) {
+        continue;
+      }
+
+      const comment = comments[hash];
+      // Identify and increase the counter for the comment type
+      availableTypes.forEach(availableType => {
+        availableType = availableType.toLowerCase();
+
+        if (((comment.content || '').toLowerCase()).indexOf(availableType) !== -1) {
+          counters[availableType] = (counters[availableType] || 0) + 1;
+        }
+      });
+    }
+
+    return counters;
+  }
+
+  renderStats(comments) {
+    const totalComments = Object.keys(comments).length;
     if (!totalComments) {
       return null;
     }
 
-    const oldestComment = this.findOldestComment();
+    const oldestComment = this.findOldestComment(comments);
     const oldestAuthor = (oldestComment.author || {});
-    const commentCounters = this.state.commentCounters;
+    const commentCounters = this.countTypes(comments);
 
     return (
       <Box flexDirection='column' padding={1} marginLeft={6}>
@@ -294,9 +318,7 @@ class Finder extends React.Component {
     return moment.duration(thenTime.diff(nowTime)).humanize(true);
   }
 
-  renderMultiline() {
-    const comments = this.state.preparedComments;
-
+  renderMultiline(comments) {
     return (
       <React.Fragment>
         <Static>
@@ -329,7 +351,7 @@ class Finder extends React.Component {
           }
 
         </Static>
-        {this.renderStats()}
+        {this.renderStats(comments)}
       </React.Fragment>
     );
   }
@@ -343,9 +365,7 @@ class Finder extends React.Component {
     return commentsLoaded && blamesLoaded;
   }
 
-  renderOneLine() {
-    const comments = this.state.preparedComments;
-
+  renderOneLine(comments) {
     return (
       <React.Fragment>
         <Static>
@@ -365,7 +385,7 @@ class Finder extends React.Component {
             })
           }
         </Static>
-        {this.renderStats()}
+        {this.renderStats(comments)}
       </React.Fragment>
     );
   }
@@ -375,17 +395,19 @@ class Finder extends React.Component {
       return this.renderLoading();
     }
 
+    // @TODO Filter while comments are being read
+    const comments = this.getFilteredComments(this.state.preparedComments);
     if (this.props.oneline) {
-      return this.renderOneLine();
+      return this.renderOneLine(comments);
     }
 
-    return this.renderMultiline();
+    return this.renderMultiline(comments);
   }
 }
 
 Finder.propTypes = {
   oneline: PropTypes.bool,
-  comments: PropTypes.string,
+  type: PropTypes.string,
   author: PropTypes.string,
 };
 

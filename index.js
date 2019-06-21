@@ -23,12 +23,12 @@ const cli = meow(`
 
     Options
       --oneline -o    Shows each comment in single line
-      --comments -c   Type of comments required FIXME/TODO/DOCME/TESTME
+      --type -t       Type of comments required FIXME/TODO/DOCME/TESTME
       --author -a     Name of the author to show the comments from
 `, {
   flags: {
     'oneline': { type: 'boolean', alias: 'o' },
-    'comments': { type: 'string', alias: 'c' },
+    'type': { type: 'string', alias: 't' },
     'author': { type: 'string', alias: 'a' }
   },
 });
