@@ -34,6 +34,7 @@ const cli = meow(`
       --author -a     Name of the author to show the comments from
       --no-stats      Do not show the stats
       --strict        Keywords must be prefixed with "@" i.e. "@todo, @fixme, @docme, @testme"
+      --debug         Prints raw errors if any
 `, {
   flags: {
     'oneline': { type: 'boolean', alias: 'o' },
@@ -41,6 +42,7 @@ const cli = meow(`
     'type': { type: 'string', alias: 't' },
     'author': { type: 'string', alias: 'a' },
     'strict': { type: 'boolean', alias: 's', default: false },
+    'debug': { type: 'boolean', alias: 'd', default: false },
   },
 });
 

@@ -162,8 +162,12 @@ class Finder extends React.Component {
    * @param err
    */
   handleError(err) {
-    // This is getting called when there are no relevant comments
+    // @fixme This is getting called when there are no relevant comments
     // @fixme parse and render
+    if (this.props.debug) {
+      console.log(err);
+      process.exit(1);
+    }
   }
 
   loadComments() {
@@ -434,6 +438,7 @@ class Finder extends React.Component {
 
 Finder.propTypes = {
   stats: PropTypes.bool,
+  debug: PropTypes.bool,
   strict: PropTypes.bool,
   oneline: PropTypes.bool,
   type: PropTypes.string,
