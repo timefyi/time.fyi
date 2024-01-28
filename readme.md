@@ -3,8 +3,8 @@
   <h2 align="center">time.fyi</h2>
   
   <p align="center">
-      <a href="https://timefyi.github.io">
-        <img src="https://img.shields.io/badge/Subscribe-Email-yellow.svg"/>
+      <a href="https://time.fyi">
+        <img src="https://img.shields.io/badge/Visit-Website-yellow.svg"/>
       </a>
       <a href="https://twitter.com/intent/user?screen_name=timefyi">
         <img src="https://img.shields.io/badge/twitter-@timefyi-blue.svg"/>
