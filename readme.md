@@ -15,7 +15,9 @@
 
 ### What is it?
 
-time.fyi has all the time related tools you need from timezones, tracking time, scheduling meetings and more. Here is the current list of available tools:
+time.fyi has all the time related tools you need from timezones, tracking time, scheduling meetings and more.
+
+Here is the current list of available tools:
 
 - [Timezone Conversion](https://time.fyi/timezones)
 - [World Clock](https://time.fyi/time)
