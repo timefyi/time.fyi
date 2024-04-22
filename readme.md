@@ -21,17 +21,16 @@ Here is the current list of available tools:
 
 - [Timezone Conversion](https://time.fyi/timezones)
 - [World Clock](https://time.fyi/time)
+- [Pomodoro](https://time.fyi/pomodoro)
+- [Daily Planner](https://time.fyi/daily-planner)
 - [Timer](https://time.fyi/timer)
 - [Stopwatch](https://time.fyi/stopwatch)
 - Countdown (coming soon)
 - Schedule Link (coming soon)
 - Group Scheduler (coming soon)
 - Time Tracking (coming soon)
-- Pomodoro (coming soon)
 - Task Tracker (coming soon)
 - Calendar (coming soon)
-- Pomodoro (coming soon)
-- Focus Timer (coming soon)
 - Suggestions? [Let us know](https://github.com/timefyi/time.fyi/issues/new)
 
 It focuses on simplicity and ease of use. We have a lot of keyboard shortcuts, intuitive UI and several other features that make it a joy to use.
