@@ -1,5 +1,5 @@
 <p align="center">
-  <img align="center" width="100" height="100" src="./.github/brand.png">
+  <img align="center" width="150" height="150" src="./.github/brand.svg">
   <h2 align="center">time.fyi</h2>
   
   <p align="center">
