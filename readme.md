@@ -30,10 +30,18 @@ Here is the current list of available tools:
 - Group Scheduler (coming soon)
 - Time Tracking (coming soon)
 - Task Tracker (coming soon)
-- Calendar (coming soon)
+- [Calendar](https://time.fyi/app)
 - Suggestions? [Let us know](https://github.com/timefyi/time.fyi/issues/new)
 
 It focuses on simplicity and ease of use. We have a lot of keyboard shortcuts, intuitive UI and several other features that make it a joy to use.
+
+## Calendar for macOS
+
+The calendar is also a native macOS app. Download the latest universal `.dmg`
+from the [releases page](https://github.com/timefyi/time.fyi/releases/latest) —
+it runs on both Apple Silicon and Intel, and updates itself once installed.
+
+Requires macOS 13.3 or later.
 
 ## Have any Feedback
 
