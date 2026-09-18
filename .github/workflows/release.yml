@@ -78,6 +78,20 @@ jobs:
             echo 'RELEASE_NOTES_EOF'
           } >> "$GITHUB_OUTPUT"
 
+      # The app icon is an Icon Composer bundle, and the bundler compiles it
+      # with a bare `actool`, which is whatever `xcode-select` points at. The
+      # runner's default is not always the newest Xcode it carries, and an
+      # actool older than 26 cannot read a .icon at all.
+      - name: Point at the newest Xcode, and say which one
+        run: |
+          newest=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$newest" ]; then
+            sudo xcode-select -s "$newest"
+          fi
+          xcode-select -p
+          xcodebuild -version
+          actool --version | plutil -extract 'com.apple.actool.version'.'short-bundle-version' raw - || true
+
       - uses: tauri-apps/tauri-action@v0
         env:
           VITE_API_URL: ${{ vars.DESKTOP_API_URL }}
@@ -97,4 +111,4 @@ jobs:
           releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           prerelease: false
-          args: --target universal-apple-darwin
+          args: --target universal-apple-darwin --verbose
