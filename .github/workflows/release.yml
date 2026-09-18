@@ -109,7 +109,7 @@ jobs:
         with:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
-          releaseName: ${{ github.ref_name }}
+          releaseName: __VERSION__
           releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           prerelease: false
