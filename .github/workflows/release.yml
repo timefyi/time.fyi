@@ -78,10 +78,12 @@ jobs:
             echo 'RELEASE_NOTES_EOF'
           } >> "$GITHUB_OUTPUT"
 
-      # The app icon is an Icon Composer bundle, and the bundler compiles it
-      # with a bare `actool`, which is whatever `xcode-select` points at. The
-      # runner's default is not always the newest Xcode it carries, and an
-      # actool older than 26 cannot read a .icon at all.
+      # The icon ships compiled (`icons/Assets.car`), because the runner's
+      # actool throws on our Icon Composer bundle where the one on a
+      # developer's Mac does not — RELEASE.md has the detail. This step is
+      # what keeps that from mattering twice: the bundler only reaches for
+      # actool if the .car is ever missing, and then it should at least be
+      # the newest one the runner carries rather than whatever is selected.
       - name: Point at the newest Xcode, and say which one
         run: |
           newest=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
@@ -90,7 +92,7 @@ jobs:
           fi
           xcode-select -p
           xcodebuild -version
-          actool --version | plutil -extract 'com.apple.actool.version'.'short-bundle-version' raw - || true
+          actool --version | plutil -extract 'com\.apple\.actool\.version'.'short-bundle-version' raw - || true
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -107,7 +109,7 @@ jobs:
         with:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
-          releaseName: Calendar __VERSION__
+          releaseName: time.fyi __VERSION__
           releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           prerelease: false
