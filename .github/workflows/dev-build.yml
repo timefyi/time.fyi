@@ -1,0 +1,105 @@
+name: Dev build
+
+# Builds "time.fyi Dev" from a branch of the private source: an amber-icon copy with its own
+# bundle id, login item and link scheme (calendar-dev://), so it installs next to the release.
+# It replaces the rolling `dev` pre-release; the updater and scripts/release.sh read
+# releases/latest, which skips pre-releases.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or commit of timefyi/calendar to build
+        default: main
+        required: true
+
+concurrency:
+  group: dev-build
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: Calendar (macOS universal, dev)
+    permissions:
+      contents: write
+    runs-on: macos-latest
+    timeout-minutes: 90
+    env:
+      TIMEFYI_CHANNEL: dev
+    steps:
+      - name: Checkout private source
+        uses: actions/checkout@v4
+        with:
+          repository: timefyi/calendar
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.SOURCE_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+          key: universal-dev
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: Stamp a dev version from the last release
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LAST=$(gh api "repos/${{ github.repository }}/releases/latest" -q .tag_name 2>/dev/null || echo v0.0.0)
+          VER="${LAST#v}-dev.${{ github.run_number }}"
+          python3 -c "import json,sys; p='apps/desktop/src-tauri/tauri.conf.json'; d=json.load(open(p)); d['version']=sys.argv[1]; json.dump(d,open(p,'w'),indent=2)" "$VER"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Building time.fyi Dev $VER"
+
+      - name: Remove the previous dev release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete dev --repo "${{ github.repository }}" --cleanup-tag --yes || true
+
+      # See release.yml: the icon ships as a compiled Assets.car, so actool should not run.
+      - name: Point at the newest Xcode, and say which one
+        run: |
+          newest=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$newest" ]; then
+            sudo xcode-select -s "$newest"
+          fi
+          xcode-select -p
+          xcodebuild -version
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          VITE_API_URL: ${{ vars.DESKTOP_API_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/desktop
+          tagName: dev
+          releaseCommitish: ${{ github.sha }}
+          releaseName: time.fyi Dev ${{ steps.version.outputs.version }}
+          releaseBody: |
+            Test build at ${{ steps.version.outputs.short }}. Not a release.
+
+            Installs as **time.fyi Dev** (amber icon) next to time.fyi. It does not update itself; run the Dev build workflow again for a newer one.
+          releaseDraft: false
+          prerelease: true
+          args: --target universal-apple-darwin --config src-tauri/tauri.dev.conf.json --verbose
